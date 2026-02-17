@@ -125,8 +125,10 @@ export const App: React.FC = () => {
 
       if (isDark) {
         document.documentElement.classList.add('dark');
+        document.querySelector('meta[name="color-scheme"]')?.setAttribute('content', 'dark');
       } else {
         document.documentElement.classList.remove('dark');
+        document.querySelector('meta[name="color-scheme"]')?.setAttribute('content', 'light');
       }
     };
 
