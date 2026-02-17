@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { generateId } from '@/src/utils';
 import { Product, ScannedData, InventoryFilter, SaleRecord, AppSettings } from '@/types';
 import { StorageService } from '@/services/storageService';
 import { dbService } from '@/src/services/db';
@@ -41,7 +42,7 @@ export const useInventory = (
                 const migratedProducts = dbProducts.map(p => {
                     if (!p.batches || p.batches.length === 0) {
                         const defaultBatch = {
-                            id: crypto.randomUUID(),
+                            id: generateId(),
                             quantity: p.quantity,
                             expiryDate: p.expiryDate,
                             addedAt: p.addedAt,
@@ -70,7 +71,7 @@ export const useInventory = (
                 return {
                     ...p,
                     batches: [{
-                        id: crypto.randomUUID(),
+                        id: generateId(),
                         quantity: p.quantity,
                         expiryDate: p.expiryDate,
                         addedAt: p.addedAt,
@@ -118,7 +119,7 @@ export const useInventory = (
             }
         } catch (error) {
             console.error("Failed to save product:", error);
-            alert("Failed to save product. Please try again.");
+            alert(`Failed to save product: ${(error as Error).message}`);
         }
     };
 
@@ -183,7 +184,7 @@ export const useInventory = (
             await dbService.addProduct(updatedProduct);
 
             const sale: SaleRecord = {
-                id: crypto.randomUUID(),
+                id: generateId(),
                 timestamp: new Date().toISOString(),
                 productId: product.id,
                 productName: product.name,
@@ -198,7 +199,7 @@ export const useInventory = (
             await refreshData();
         } catch (error) {
             console.error("Failed to process sale:", error);
-            alert("Failed to process sale. Please try again.");
+            alert(`Failed to process sale: ${(error as Error).message}`);
         }
     };
 

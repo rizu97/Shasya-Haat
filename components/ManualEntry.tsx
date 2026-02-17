@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Product, ScannedData, ProductUnit, StockBatch } from '../types';
 import { TRANSLATIONS, MOCK_DB } from '../constants';
 import { StorageService } from '../services/storageService';
+import { generateId } from '../src/utils';
 import { ChevronDown, Camera, Image as ImageIcon, ChevronLeft, Package, ShoppingBag, Calendar, Database, Store, Plus, Trash2 } from 'lucide-react';
 
 interface ManualEntryProps {
@@ -52,7 +53,7 @@ export const ManualEntry: React.FC<ManualEntryProps> = ({ initialData, editingPr
   useEffect(() => {
     if (editingProduct && (!editingProduct.batches || editingProduct.batches.length === 0) && editingProduct.quantity > 0) {
       setBatches([{
-        id: crypto.randomUUID(),
+        id: generateId(),
         quantity: editingProduct.quantity,
         expiryDate: editingProduct.expiryDate,
         addedAt: editingProduct.addedAt
@@ -139,7 +140,7 @@ export const ManualEntry: React.FC<ManualEntryProps> = ({ initialData, editingPr
     if (!qty || qty <= 0) return;
 
     const newBatch: StockBatch = {
-      id: crypto.randomUUID(),
+      id: generateId(),
       quantity: qty,
       expiryDate: currentBatchExpiry || undefined,
       addedAt: new Date().toISOString()
@@ -187,7 +188,7 @@ export const ManualEntry: React.FC<ManualEntryProps> = ({ initialData, editingPr
       if (validExpiryBatches.length > 0) nearestExpiry = validExpiryBatches[0].expiryDate;
 
       const newProduct: Product = {
-        id: editingProduct?.id || crypto.randomUUID(),
+        id: editingProduct?.id || generateId(),
         name,
         nameBn: nameBn || name,
         mrp: pMrp,
@@ -204,7 +205,7 @@ export const ManualEntry: React.FC<ManualEntryProps> = ({ initialData, editingPr
       await onSave(newProduct);
     } catch (error) {
       console.error("Save failed", error);
-      alert(language === 'en' ? "Failed to save item." : "আইটেম সংরক্ষণ করতে ব্যর্থ হয়েছে।");
+      alert(language === 'en' ? `Failed to save item: ${(error as Error).message}` : `আইটেম সংরক্ষণ করতে ব্যর্থ হয়েছে: ${(error as Error).message}`);
     } finally {
       setIsSaving(false);
     }
