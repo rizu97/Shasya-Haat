@@ -482,3 +482,4 @@ const BatchDetailsModal: React.FC<{
       </div>
     </div>
   );
+};
