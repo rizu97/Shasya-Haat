@@ -93,14 +93,18 @@ export const App: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [appSettings, setAppSettings] = useState<AppSettings>({
-    shopName: '',
-    gstNumber: '',
-    mobile: '',
-    lowStockThreshold: 5,
-    nearExpiryDays: 30,
-    language: 'en',
-    theme: 'dark',
+  const [appSettings, setAppSettings] = useState<AppSettings>(() => {
+    const saved = StorageService.getSettings();
+    return saved || {
+      shopName: '',
+      gstNumber: '',
+      mobile: '',
+      ownerName: '',
+      lowStockThreshold: 5,
+      nearExpiryDays: 30,
+      language: 'en',
+      theme: 'dark', // Default fallback
+    };
   });
 
   // 1. Auth Hook (no longer takes setView)
