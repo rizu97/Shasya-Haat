@@ -5,6 +5,7 @@
 
 /* ── Light Mode Tokens ────────────────────────── */
 :root {
+    color-scheme: light;
     /* Backgrounds — warm off-white page so white cards POP */
     --bg-main: #F0EDE6;
     --bg-surface: #FFFFFF;
