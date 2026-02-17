@@ -5,10 +5,10 @@ import { TRANSLATIONS } from '../../constants';
 
 export const useCart = (
     products: Product[],
-    handleSellProduct: (product: Product, quantity: number, price: number) => void,
+    handleSellProduct: (product: Product, quantity: number, price: number, batchId?: string) => void,
     appSettings: AppSettings
 ) => {
-    const [cart, setCart] = useState<{ product: Product, quantity: number }[]>([]);
+    const [cart, setCart] = useState<{ product: Product, quantity: number, batchId?: string, salePrice?: number }[]>([]);
     const navigate = useNavigate();
 
     const handleScanToSell = (data: ScannedData) => {
@@ -25,7 +25,9 @@ export const useCart = (
 
         if (foundProduct) {
             setCart(prevCart => {
-                const existingIndex = prevCart.findIndex(item => item.product.id === foundProduct.id);
+                // Default to first batch or generic logic if added via scan (to be improved later if needed)
+                // For now, scan adds generic item (FIFO).
+                const existingIndex = prevCart.findIndex(item => item.product.id === foundProduct.id && !item.batchId);
                 if (existingIndex > -1) {
                     const newCart = [...prevCart];
                     newCart[existingIndex] = {
@@ -48,8 +50,8 @@ export const useCart = (
         if (cart.length === 0) return;
 
         cart.forEach(item => {
-            const totalItemPrice = item.product.mrp * item.quantity;
-            handleSellProduct(item.product, item.quantity, totalItemPrice);
+            const totalItemPrice = (item.salePrice || item.product.mrp) * item.quantity;
+            handleSellProduct(item.product, item.quantity, totalItemPrice, item.batchId);
         });
 
         setCart([]);

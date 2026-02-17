@@ -1,11 +1,13 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Product } from '../types';
+import { Product, StockBatch } from '../types';
 import { TRANSLATIONS } from '../constants';
 import { Search, ScanQrCode, Plus, Minus, Trash2, ShoppingBag, ChevronRight, CheckCircle } from 'lucide-react';
 
 interface CartItem {
   product: Product;
   quantity: number;
+  batchId?: string;
+  salePrice?: number;
 }
 
 interface TradeProps {
@@ -30,6 +32,7 @@ export const Trade: React.FC<TradeProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [selectedProductForBatch, setSelectedProductForBatch] = useState<Product | null>(null);
 
   const t = (key: keyof typeof TRANSLATIONS) => language === 'en' ? TRANSLATIONS[key].en : TRANSLATIONS[key].bn;
   const tSub = (key: keyof typeof TRANSLATIONS) => language === 'en' ? TRANSLATIONS[key].bn : TRANSLATIONS[key].en;
@@ -61,24 +64,46 @@ export const Trade: React.FC<TradeProps> = ({
     setSearchResults(results.slice(0, 5));
   }, [searchTerm, products]);
 
-  const addToCart = (product: Product) => {
-    // onUpdateCart is setCart from App.tsx, so we can use functional updates
+  const initiateAddToCart = (product: Product) => {
+    // If product has multiple batches, or user wants to specify price/qty, show modal.
+    // For now, ALWAYS show modal to restore the requested feature of "choosing price/qty/batch".
+    setSelectedProductForBatch(product);
+    setSearchTerm('');
+    setSearchResults([]);
+  };
+
+  const confirmAddToCart = (product: Product, quantity: number, price: number, batchId?: string) => {
     onUpdateCart((prevCart: CartItem[]) => {
-      const existingIndex = prevCart.findIndex(item => item.product.id === product.id);
+      // If batchId is present, treat as unique item key combined with product ID
+      if (batchId) {
+        const existingIndex = prevCart.findIndex(item => item.product.id === product.id && item.batchId === batchId);
+        if (existingIndex > -1) {
+          const newCart = [...prevCart];
+          newCart[existingIndex] = {
+            ...newCart[existingIndex],
+            quantity: newCart[existingIndex].quantity + quantity,
+            salePrice: price // Update price if they re-add same batch? Or keep old? Let's update.
+          };
+          return newCart;
+        }
+        return [...prevCart, { product, quantity, salePrice: price, batchId }];
+      }
+
+      // Fallback for no batch (shouldn't happen with new modal, but safe to keep)
+      const existingIndex = prevCart.findIndex(item => item.product.id === product.id && !item.batchId);
       if (existingIndex > -1) {
         const newCart = [...prevCart];
         newCart[existingIndex] = {
           ...newCart[existingIndex],
-          quantity: newCart[existingIndex].quantity + 1
+          quantity: newCart[existingIndex].quantity + quantity,
+          salePrice: price
         };
         return newCart;
       } else {
-        return [...prevCart, { product, quantity: 1 }];
+        return [...prevCart, { product, quantity, salePrice: price }];
       }
     });
-
-    setSearchTerm('');
-    setSearchResults([]);
+    setSelectedProductForBatch(null);
   };
 
   const updateQuantity = (productId: string, delta: number) => {
@@ -111,7 +136,7 @@ export const Trade: React.FC<TradeProps> = ({
   };
 
   const totalPayable = useMemo(() => {
-    return cart.reduce((sum, item) => sum + (item.product.mrp * item.quantity), 0);
+    return cart.reduce((sum, item) => sum + ((item.salePrice || item.product.mrp) * item.quantity), 0);
   }, [cart]);
 
   return (
@@ -160,7 +185,7 @@ export const Trade: React.FC<TradeProps> = ({
               {searchResults.map((product) => (
                 <button
                   key={product.id}
-                  onClick={() => addToCart(product)}
+                  onClick={() => initiateAddToCart(product)}
                   className="w-full text-left p-3 border-b border-[var(--border-subtle)] last:border-0 hover:bg-[var(--card-hover)] flex items-center justify-between group transition-colors"
                 >
                   <div translate="no" className="notranslate">
@@ -216,9 +241,19 @@ export const Trade: React.FC<TradeProps> = ({
                   <div className="min-w-0 flex-1">
                     <div translate="no" className="notranslate">
                       <h4 className="font-semibold text-sm text-[var(--text-primary)] leading-tight truncate">{getPrimaryName(item.product)}</h4>
-                      <p className="text-[10px] text-[var(--text-tertiary)] font-bn truncate">{getSecondaryName(item.product)}</p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-[10px] text-[var(--text-tertiary)] font-bn truncate max-w-[80px]">{getSecondaryName(item.product)}</p>
+                        {item.batchId && (
+                          <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)] font-mono">
+                            B: {item.batchId.slice(0, 4)}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <p className="text-sm font-bold text-[var(--accent)] font-mono leading-none mt-0.5">₹{item.product.mrp.toFixed(2)}</p>
+                    <p className="text-sm font-bold text-[var(--accent)] font-mono leading-none mt-0.5">
+                      ₹{((item.salePrice || item.product.mrp) * item.quantity).toFixed(2)}
+                      {item.quantity > 1 && <span className="text-[9px] text-[var(--text-tertiary)] ml-1 font-normal">(₹{item.salePrice || item.product.mrp}/u)</span>}
+                    </p>
                   </div>
                 </div>
 
@@ -316,6 +351,134 @@ export const Trade: React.FC<TradeProps> = ({
         </div>
       )}
 
+      {/* Batch Selection Modal */}
+      {selectedProductForBatch && (
+        <BatchDetailsModal
+          product={selectedProductForBatch}
+          onConfirm={confirmAddToCart}
+          onCancel={() => setSelectedProductForBatch(null)}
+          language={language}
+          formatCurrency={formatCurrency}
+        />
+      )}
+
     </div>
   );
 };
+
+// Internal Component for Batch Selection
+const BatchDetailsModal: React.FC<{
+  product: Product;
+  onConfirm: (product: Product, quantity: number, price: number, batchId?: string) => void;
+  onCancel: () => void;
+  language: 'en' | 'bn';
+  formatCurrency: (val: number) => string;
+}> = ({ product, onConfirm, onCancel, language, formatCurrency }) => {
+  const [selectedBatchId, setSelectedBatchId] = useState<string | undefined>(
+    (product.batches && product.batches.length > 0) ? product.batches[0].id : undefined
+  );
+  const [quantity, setQuantity] = useState(1);
+  const [price, setPrice] = useState(product.mrp);
+
+  // Update price default when batch changes (optional, if batches had specific MRPs, but usually MRP is product level. 
+  // However, cost price might differ. For selling, we usually default to Product MRP)
+
+  const handleConfirm = () => {
+    onConfirm(product, quantity, price, selectedBatchId);
+  };
+
+  const batches = product.batches || [];
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in">
+      <div className="bg-[var(--bg-surface)] w-full max-w-sm rounded-3xl p-5 border border-[var(--border-color)] shadow-[var(--shadow-xl)] animate-scale-in flex flex-col max-h-[90vh]">
+
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <h3 className="text-lg font-bold text-[var(--text-primary)] leading-tight">{language === 'en' ? product.name : (product.nameBn || product.name)}</h3>
+            <p className="text-xs text-[var(--text-secondary)]">Stock: <span className="font-bold">{product.quantity} {product.unit}</span></p>
+          </div>
+          <button onClick={onCancel} className="p-2 -mr-2 -mt-2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)]">
+            <span className="sr-only">Close</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto min-h-0 space-y-4 pr-1">
+          {/* Batch Selection */}
+          {batches.length > 0 && (
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">Select Batch</label>
+              <div className="space-y-2">
+                {batches.map(batch => (
+                  <label key={batch.id} className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${selectedBatchId === batch.id ? 'border-[var(--accent)] bg-[var(--accent-light)]' : 'border-[var(--border-subtle)] bg-[var(--input-bg)]'}`}>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="radio"
+                        name="batch"
+                        value={batch.id}
+                        checked={selectedBatchId === batch.id}
+                        onChange={() => setSelectedBatchId(batch.id)}
+                        className="accent-[var(--accent)] w-4 h-4"
+                      />
+                      <div>
+                        <div className="text-xs font-bold text-[var(--text-primary)]">
+                          Exp: {batch.expiryDate ? new Date(batch.expiryDate).toLocaleDateString() : 'N/A'}
+                        </div>
+                        <div className="text-[10px] text-[var(--text-secondary)]">
+                          Qty: {batch.quantity} | Cost: {formatCurrency(batch.costPrice || 0)}
+                        </div>
+                      </div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Quantity & Price */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">Quantity</label>
+              <div className="flex items-center bg-[var(--input-bg)] rounded-xl border border-[var(--border-subtle)] h-12 px-1">
+                <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-10 h-full flex items-center justify-center text-[var(--text-secondary)] active:scale-90 transition-transform">
+                  <Minus size={16} />
+                </button>
+                <input
+                  type="number"
+                  value={quantity}
+                  onChange={(e) => setQuantity(Math.max(1, Number(e.target.value)))}
+                  className="flex-1 w-full bg-transparent text-center font-bold text-[var(--text-primary)] outline-none"
+                />
+                <button onClick={() => setQuantity(quantity + 1)} className="w-10 h-full flex items-center justify-center text-[var(--text-secondary)] active:scale-90 transition-transform">
+                  <Plus size={16} />
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">Sale Price (Unit)</label>
+              <div className="flex items-center bg-[var(--input-bg)] rounded-xl border border-[var(--border-subtle)] h-12 px-3 focus-within:border-[var(--accent)] focus-within:ring-1 focus-within:ring-[var(--accent-glow)] transition-all">
+                <span className="text-[var(--text-tertiary)] mr-1">₹</span>
+                <input
+                  type="number"
+                  value={price}
+                  onChange={(e) => setPrice(Number(e.target.value))}
+                  className="w-full bg-transparent font-bold text-[var(--text-primary)] outline-none"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 pt-4 border-t border-[var(--border-subtle)]">
+          <button
+            onClick={handleConfirm}
+            className="btn-primary w-full h-12 !rounded-xl text-sm"
+          >
+            Add to Cart — {formatCurrency(price * quantity)}
+          </button>
+        </div>
+      </div>
+    </div>
+  );

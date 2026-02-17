@@ -139,31 +139,50 @@ export const useInventory = (
         }
     };
 
-    const handleSellProduct = async (product: Product, quantitySold: number, salePrice: number) => {
+    const handleSellProduct = async (product: Product, quantitySold: number, salePrice: number, batchId?: string) => {
         if (quantitySold <= 0) return;
 
         let remainingToSell = quantitySold;
 
-        const sortedBatches = [...(product.batches || [])].sort((a, b) => {
-            if (a.expiryDate && b.expiryDate) return new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime();
-            if (a.expiryDate) return -1;
-            if (b.expiryDate) return 1;
-            return 0;
-        });
+        // If batchId is provided, deduct specifically from that batch
+        let newBatches;
+        if (batchId) {
+            newBatches = (product.batches || []).map(batch => {
+                if (batch.id === batchId) {
+                    if (batch.quantity >= quantitySold) {
+                        return { ...batch, quantity: batch.quantity - quantitySold };
+                    } else {
+                        // Not enough stock in specific batch? (Should be validated in UI). 
+                        // For safety, deduct what we can and rest remains zero (error state implicitly handled by UI validation)
+                        // Or, fallback? Let's just deduct available.
+                        return { ...batch, quantity: Math.max(0, batch.quantity - quantitySold) };
+                    }
+                }
+                return batch;
+            }).filter(b => b.quantity > 0);
+        } else {
+            // FIFO Logic (Legacy/Generic)
+            const sortedBatches = [...(product.batches || [])].sort((a, b) => {
+                if (a.expiryDate && b.expiryDate) return new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime();
+                if (a.expiryDate) return -1;
+                if (b.expiryDate) return 1;
+                return 0;
+            });
 
-        const newBatches = sortedBatches.map(batch => {
-            if (remainingToSell <= 0) return batch;
+            newBatches = sortedBatches.map(batch => {
+                if (remainingToSell <= 0) return batch;
 
-            if (batch.quantity >= remainingToSell) {
-                const updatedBatch = { ...batch, quantity: batch.quantity - remainingToSell };
-                remainingToSell = 0;
-                return updatedBatch;
-            } else {
-                const amountFromBatch = batch.quantity;
-                remainingToSell -= amountFromBatch;
-                return { ...batch, quantity: 0 };
-            }
-        }).filter(b => b.quantity > 0);
+                if (batch.quantity >= remainingToSell) {
+                    const updatedBatch = { ...batch, quantity: batch.quantity - remainingToSell };
+                    remainingToSell = 0;
+                    return updatedBatch;
+                } else {
+                    const amountFromBatch = batch.quantity;
+                    remainingToSell -= amountFromBatch;
+                    return { ...batch, quantity: 0 };
+                }
+            }).filter(b => b.quantity > 0);
+        }
 
         const newTotalQty = newBatches.reduce((sum, b) => sum + b.quantity, 0);
         let newNearestExpiry = undefined;
