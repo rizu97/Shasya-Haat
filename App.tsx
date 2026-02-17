@@ -17,7 +17,7 @@ import { RegisterShop } from './components/RegisterShop';
 import { VerifyPhone } from './components/VerifyPhone';
 import { Trade } from './components/Trade';
 import { BottomNav } from './components/BottomNav';
-import { ChevronRight, Settings as SettingsIcon, LogOut, HelpCircle } from 'lucide-react';
+import { ChevronRight, Settings as SettingsIcon, LogOut, HelpCircle, Download } from 'lucide-react';
 import { useAuth } from './src/hooks/useAuth';
 import { useInventory } from './src/hooks/useInventory';
 import { useCart } from './src/hooks/useCart';
@@ -26,7 +26,9 @@ import { useCart } from './src/hooks/useCart';
 const MorePage: React.FC<{
   language: 'en' | 'bn';
   onLogout: () => void;
-}> = ({ language, onLogout }) => {
+  installPrompt: any;
+  onInstall: () => void;
+}> = ({ language, onLogout, installPrompt, onInstall }) => {
   const navigate = useNavigate();
   const tMore = (key: keyof typeof TRANSLATIONS) =>
     language === 'en' ? TRANSLATIONS[key].en : TRANSLATIONS[key].bn;
@@ -40,7 +42,25 @@ const MorePage: React.FC<{
 
       <div className="p-4 space-y-6 flex-1 overflow-y-auto pb-32 max-w-lg mx-auto w-full">
         <div className="space-y-2">
-          <p className="px-2 text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-2">{tMore('general')}</p>
+          {installPrompt && (
+            <button
+              onClick={onInstall}
+              className="w-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-hover)] p-4 rounded-2xl border border-[var(--accent)] flex items-center justify-between group active:scale-[0.98] transition-all shadow-lg animate-pulse-glow"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white">
+                  <Download size={18} strokeWidth={2.5} />
+                </div>
+                <div className="flex flex-col items-start translate-y-[-1px]">
+                  <span className="font-bold text-white text-sm">{language === 'en' ? 'Install App' : 'অ্যাপ ইনস্টল করুন'}</span>
+                  <span className="text-[10px] text-white/80 font-medium">{language === 'en' ? 'Add to Home Screen' : 'হোম স্ক্রিনে যোগ করুন'}</span>
+                </div>
+              </div>
+              <ChevronRight size={16} className="text-white" />
+            </button>
+          )}
+
+          <p className="px-2 text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-2 mt-4">{tMore('general')}</p>
           <button
             onClick={() => navigate('/settings')}
             className="w-full bg-surface p-4 rounded-2xl border border-border flex items-center justify-between group active:scale-[0.98] transition-all hover:bg-gray-100 dark:hover:bg-[#161616]"
@@ -92,6 +112,27 @@ const MorePage: React.FC<{
 export const App: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
+
+  useEffect(() => {
+    const handler = (e: any) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstallClick = () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    installPrompt.userChoice.then((choiceResult: any) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+      }
+      setInstallPrompt(null);
+    });
+  };
 
   const [appSettings, setAppSettings] = useState<AppSettings>(() => {
     const saved = StorageService.getSettings();
@@ -276,6 +317,8 @@ export const App: React.FC = () => {
                 <MorePage
                   language={appSettings.language}
                   onLogout={auth.logout}
+                  installPrompt={installPrompt}
+                  onInstall={handleInstallClick}
                 />
               } />
 
