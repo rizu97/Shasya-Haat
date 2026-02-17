@@ -1,0 +1,7 @@
+{
+  "name": "KiranaKlick",
+  "description": "A mobile-first, bilingual grocery inventory manager with AI scanning.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

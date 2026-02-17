@@ -1,0 +1,474 @@
+/* ══════════════════════════════════════════════
+   KiranaKlick Design System — v2.0
+   Premium polish for both Light & Dark modes
+   ══════════════════════════════════════════════ */
+
+/* ── Light Mode Tokens ────────────────────────── */
+:root {
+    /* Backgrounds — warm off-white page so white cards POP */
+    --bg-main: #F0EDE6;
+    --bg-surface: #FFFFFF;
+    --bg-elevated: #FFFFFF;
+    --border-color: #D5CFC3;
+    --border-subtle: #E8E3D9;
+
+    /* Text — richer blacks for readability */
+    --text-primary: #1A1814;
+    --text-secondary: #5C554A;
+    --text-tertiary: #8A8278;
+
+    /* Accent (Orange) — saturated & punchy */
+    --accent: #F27A1A;
+    --accent-hover: #D96A10;
+    --accent-light: #FEF0E1;
+    --accent-glow: rgba(242, 122, 26, 0.3);
+
+    /* Semantic — slightly deeper for light bg */
+    --success: #16A34A;
+    --success-bg: #ECFDF0;
+    --success-border: #A7F3D0;
+    --danger: #DC2626;
+    --danger-bg: #FEF2F2;
+    --danger-border: #FECACA;
+    --info: #2563EB;
+    --info-bg: #EFF6FF;
+    --info-border: #BFDBFE;
+
+    /* Interactive — visible hover / active states */
+    --card-hover: #F5F1EA;
+    --card-active: #EBE6DC;
+    --input-bg: #F5F2EB;
+    --input-focus-ring: rgba(242, 122, 26, 0.3);
+
+    /* Glassmorphism */
+    --glass-bg: rgba(255, 255, 255, 0.82);
+    --glass-border: rgba(213, 207, 195, 0.5);
+    --glass-shadow: rgba(0, 0, 0, 0.12);
+
+    /* Shadows — stronger so cards lift off the page */
+    --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.12), 0 2px 6px -2px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 12px 28px -4px rgba(0, 0, 0, 0.14), 0 4px 12px -4px rgba(0, 0, 0, 0.08);
+    --shadow-xl: 0 24px 48px -8px rgba(0, 0, 0, 0.16);
+    --shadow-glow: 0 0 24px rgba(242, 122, 26, 0.22);
+
+    /* Gradients */
+    --gradient-sales: linear-gradient(135deg, #1E40AF 0%, #1E3A8A 50%, #172554 100%);
+    --gradient-items: linear-gradient(135deg, #059669 0%, #047857 50%, #064E3B 100%);
+    --gradient-accent: linear-gradient(135deg, #F27A1A 0%, #D96A10 100%);
+    --gradient-surface: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-main) 100%);
+}
+
+/* ── Dark Mode Tokens ─────────────────────────── */
+.dark {
+    color-scheme: dark;
+
+    --bg-main: #09090B;
+    --bg-surface: #18181B;
+    --bg-elevated: #1F1F23;
+    --border-color: #27272A;
+    --border-subtle: #1F1F23;
+
+    --text-primary: #FAFAFA;
+    --text-secondary: #A1A1AA;
+    --text-tertiary: #71717A;
+
+    --accent: #FB923C;
+    --accent-hover: #F97316;
+    --accent-light: rgba(251, 146, 60, 0.1);
+    --accent-glow: rgba(251, 146, 60, 0.3);
+
+    --success-bg: rgba(34, 197, 94, 0.08);
+    --success-border: rgba(34, 197, 94, 0.2);
+    --danger-bg: rgba(239, 68, 68, 0.08);
+    --danger-border: rgba(239, 68, 68, 0.2);
+    --info-bg: rgba(59, 130, 246, 0.08);
+    --info-border: rgba(59, 130, 246, 0.2);
+
+    --card-hover: #1F1F23;
+    --card-active: #27272A;
+    --input-bg: #1F1F23;
+    --input-focus-ring: rgba(251, 146, 60, 0.3);
+
+    --glass-bg: rgba(24, 24, 27, 0.72);
+    --glass-border: rgba(255, 255, 255, 0.06);
+    --glass-shadow: rgba(0, 0, 0, 0.4);
+
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.5), 0 4px 10px -4px rgba(0, 0, 0, 0.3);
+    --shadow-xl: 0 20px 40px -5px rgba(0, 0, 0, 0.6);
+    --shadow-glow: 0 0 25px rgba(251, 146, 60, 0.2);
+
+    --gradient-surface: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-main) 100%);
+}
+
+
+/* ══════════════════════════════════════════════
+   Base Styles
+   ══════════════════════════════════════════════ */
+body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+*,
+*::before,
+*::after {
+    border-color: var(--border-color);
+}
+
+
+/* ══════════════════════════════════════════════
+   Reusable Components
+   ══════════════════════════════════════════════ */
+
+/* ── Card ────────────────────────────────────── */
+.card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 1.25rem;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.2s ease,
+        background-color 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.card:active {
+    transform: scale(0.985);
+}
+
+/* ── Stat Card (gradient) ────────────────────── */
+.stat-card {
+    position: relative;
+    border-radius: 1.5rem;
+    padding: 1.25rem;
+    overflow: hidden;
+    color: white;
+    box-shadow: var(--shadow-lg);
+    transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease;
+}
+
+.stat-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-xl);
+}
+
+.stat-card-sales {
+    background: var(--gradient-sales);
+}
+
+.stat-card-items {
+    background: var(--gradient-items);
+}
+
+/* ── Chip ────────────────────────────────────── */
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.375rem 0.875rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    border: 1px solid var(--border-color);
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.chip:hover {
+    background: var(--card-hover);
+    color: var(--text-primary);
+    border-color: var(--text-tertiary);
+}
+
+.chip-active {
+    background: var(--accent) !important;
+    color: white !important;
+    border-color: var(--accent) !important;
+    box-shadow: 0 2px 8px var(--accent-glow);
+}
+
+/* ── Button Primary ──────────────────────────── */
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 1rem;
+    font-weight: 700;
+    font-size: 0.875rem;
+    color: white;
+    background: var(--gradient-accent);
+    border: none;
+    box-shadow: var(--shadow-md), 0 2px 10px var(--accent-glow);
+    transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg), 0 4px 20px var(--accent-glow);
+}
+
+.btn-primary:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* ── Search Input ────────────────────────────── */
+.search-input {
+    background: var(--input-bg);
+    border: 1.5px solid var(--border-color);
+    border-radius: 1rem;
+    transition: all 0.2s ease;
+}
+
+.search-input:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--input-focus-ring);
+    background: var(--bg-surface);
+}
+
+/* ── List Item ───────────────────────────────── */
+.list-item {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 1.25rem;
+    transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.list-item:hover {
+    background: var(--card-hover);
+    box-shadow: var(--shadow-sm);
+}
+
+.list-item:active {
+    transform: scale(0.985);
+    background: var(--card-active);
+}
+
+/* ── Menu Item ───────────────────────────────── */
+.menu-item {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.15s ease;
+    cursor: pointer;
+}
+
+.menu-item:hover {
+    background: var(--card-hover);
+}
+
+.menu-item:active {
+    transform: scale(0.985);
+    background: var(--card-active);
+}
+
+/* ── Section Label ───────────────────────────── */
+.section-label {
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-tertiary);
+    padding: 0 0.25rem;
+    margin-bottom: 0.75rem;
+}
+
+/* ── Empty State ─────────────────────────────── */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    border-radius: 1.5rem;
+    border: 1.5px dashed var(--border-color);
+    background: var(--gradient-surface);
+}
+
+.empty-state-icon {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-light);
+    color: var(--accent);
+    margin-bottom: 1rem;
+}
+
+
+/* ══════════════════════════════════════════════
+   Glassmorphism
+   ══════════════════════════════════════════════ */
+.glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px var(--glass-shadow);
+}
+
+.glass-card {
+    background: var(--bg-surface);
+    background: var(--gradient-surface);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-md);
+}
+
+
+/* ══════════════════════════════════════════════
+   Animations
+   ══════════════════════════════════════════════ */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(16px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.96);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes pulseGlow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 12px var(--accent-glow), var(--shadow-md);
+    }
+
+    50% {
+        box-shadow: 0 0 28px var(--accent-glow), var(--shadow-lg);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+.animate-slide-up {
+    animation: slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-scale-in {
+    animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-pulse-glow {
+    animation: pulseGlow 2.5s ease-in-out infinite;
+}
+
+
+/* ══════════════════════════════════════════════
+   Typography & Gradient Utilities
+   ══════════════════════════════════════════════ */
+.text-gradient {
+    background: linear-gradient(135deg, var(--accent) 0%, #F43F5E 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.bg-gradient-primary {
+    background: var(--gradient-accent);
+}
+
+
+/* ══════════════════════════════════════════════
+   Scrollbar
+   ══════════════════════════════════════════════ */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.mask-linear-fade {
+    mask-image: linear-gradient(to right, black 85%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+}
+
+
+/* ══════════════════════════════════════════════
+   Focus & Accessibility
+   ══════════════════════════════════════════════ */
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
