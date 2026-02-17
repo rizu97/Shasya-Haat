@@ -148,9 +148,6 @@ export const RegisterShop: React.FC<RegisterShopProps> = ({ onContinue, onBack, 
           </p>
         </div>
       </div>
-
-      {/* Invisible reCAPTCHA container for Firebase Phone Auth */}
-      <div id="recaptcha-container"></div>
     </div>
   );
 };

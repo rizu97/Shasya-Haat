@@ -3,11 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Product, ScannedData, InventoryFilter, SaleRecord, AppSettings } from '@/types';
 import { StorageService } from '@/services/storageService';
 import { dbService } from '@/src/services/db';
-import { cloudSync } from '@/src/services/cloudSync';
 
 export const useInventory = (
-    _appSettings: AppSettings,
-    uid: string | null = null
+    _appSettings: AppSettings
 ) => {
     const [products, setProducts] = useState<Product[]>([]);
     const [sales, setSales] = useState<SaleRecord[]>([]);
@@ -109,12 +107,6 @@ export const useInventory = (
             };
 
             await dbService.addProduct(finalProduct);
-
-            // Cloud sync
-            if (uid) {
-                cloudSync.syncProduct(uid, finalProduct);
-            }
-
             await refreshData();
 
             setScannedData(undefined);
@@ -136,12 +128,6 @@ export const useInventory = (
             try {
                 await dbService.deleteProduct(id);
                 console.log("Product deleted from DB");
-
-                // Cloud sync
-                if (uid) {
-                    cloudSync.deleteCloudProduct(uid, id);
-                }
-
                 await refreshData();
                 console.log("Data refreshed");
             } catch (error) {
@@ -209,13 +195,6 @@ export const useInventory = (
             };
 
             await dbService.addSale(sale);
-
-            // Cloud sync — fire and forget
-            if (uid) {
-                cloudSync.syncProduct(uid, updatedProduct);
-                cloudSync.syncSale(uid, sale);
-            }
-
             await refreshData();
         } catch (error) {
             console.error("Failed to process sale:", error);

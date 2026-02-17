@@ -95,9 +95,6 @@ export const Login: React.FC<LoginProps> = ({ onSendOtp, language: _language = '
           {TRANSLATIONS.needHelp.en} / <span className="font-['Hind_Siliguri']">{TRANSLATIONS.needHelp.bn}</span>
         </button>
       </div>
-
-      {/* Invisible reCAPTCHA container for Firebase Phone Auth */}
-      <div id="recaptcha-container"></div>
     </div>
   );
 };

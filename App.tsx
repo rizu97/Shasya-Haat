@@ -103,13 +103,13 @@ export const App: React.FC = () => {
     theme: 'dark',
   });
 
-  // 1. Auth Hook (Firebase phone auth)
+  // 1. Auth Hook (no longer takes setView)
   const auth = useAuth(appSettings, setAppSettings);
 
-  // 2. Inventory Hook (with cloud sync via uid)
-  const inventory = useInventory(appSettings, auth.uid);
+  // 2. Inventory Hook (no longer takes setView/setReturnView)
+  const inventory = useInventory(appSettings);
 
-  // 3. Cart Hook
+  // 3. Cart Hook (no longer takes setView)
   const cart = useCart(inventory.products, inventory.handleSellProduct, appSettings);
 
   // Apply Theme
@@ -152,18 +152,6 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('online', handleOnline);
   }, [appSettings.language, inventory]);
 
-  // Show loading while Firebase checks auth state
-  if (auth.isAuthLoading) {
-    return (
-      <div className="w-full h-[100dvh] bg-[#050505] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-3 border-[#FF9800] border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-gray-400 text-sm">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
   // Auth-gating: if not authenticated, show auth routes
   if (auth.authState === 'LANDING') {
     return <LandingPage onSelectRole={auth.handleRoleSelect} />;
@@ -192,7 +180,7 @@ export const App: React.FC = () => {
             <Route path="/auth/verify" element={
               <VerifyPhone
                 mobileNumber={auth.regData.mobile || 'XXXXXXXXXX'}
-                onVerify={auth.handleVerifyOtp}
+                onVerify={auth.handleLoginSuccess}
                 onBack={() => navigate('/auth/register')}
                 language={appSettings.language}
                 mode="REGISTER"
@@ -204,7 +192,7 @@ export const App: React.FC = () => {
             <Route path="/auth/login/otp" element={
               <VerifyPhone
                 mobileNumber={auth.loginPhone}
-                onVerify={auth.handleVerifyOtp}
+                onVerify={auth.handleLoginSuccess}
                 onBack={() => navigate('/auth/login')}
                 language={appSettings.language}
                 mode="LOGIN"

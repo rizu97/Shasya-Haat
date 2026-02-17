@@ -4,7 +4,7 @@ import { ArrowLeft, Store, HelpCircle, Timer } from 'lucide-react';
 
 interface VerifyPhoneProps {
   mobileNumber: string;
-  onVerify: (otpCode: string) => void;
+  onVerify: () => void;
   onBack: () => void;
   language: 'en' | 'bn';
   mode?: 'REGISTER' | 'LOGIN';
@@ -68,9 +68,8 @@ export const VerifyPhone: React.FC<VerifyPhoneProps> = ({ mobileNumber, onVerify
   };
 
   const handleSubmit = () => {
-    const code = otp.join('');
-    if (code.length === otpLength) {
-      onVerify(code);
+    if (otp.join('').length === otpLength) {
+      onVerify();
     } else {
       alert(`Please enter a valid ${otpLength}-digit OTP`);
     }
