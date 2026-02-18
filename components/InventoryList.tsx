@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Product, InventoryFilter } from '../types';
 import { Search, SlidersHorizontal, Package, ShoppingBag, Droplet, Plus, Trash2, Egg, Coffee, Cookie, ChevronDown } from 'lucide-react';
+import { formatNumber, formatUnit } from '@/src/utils';
 
 interface InventoryListProps {
   products: Product[];
@@ -241,7 +242,7 @@ export const InventoryList: React.FC<InventoryListProps> = ({
                                 {status.label}
                               </span>
                               <span className="text-xs font-medium text-[var(--text-secondary)]">
-                                {item.quantity} {item.unit}
+                                {formatNumber(item.quantity, language)} {formatUnit(item.unit, language)}
                               </span>
                             </div>
                           </div>
@@ -261,7 +262,7 @@ export const InventoryList: React.FC<InventoryListProps> = ({
                       <div className="text-[10px] text-[var(--text-tertiary)]">
                         {item.expiryDate ? (
                           <span className={status.text === 'text-[#CF6679]' ? 'text-[var(--danger)] font-bold' : ''}>
-                            Exp: {new Date(item.expiryDate).toLocaleDateString()}
+                            Exp: {new Date(item.expiryDate).toLocaleDateString(language === 'en' ? 'en-IN' : 'bn-IN')}
                           </span>
                         ) : (
                           <span>No Expiry</span>
@@ -298,14 +299,14 @@ export const InventoryList: React.FC<InventoryListProps> = ({
                         ) : getProductIcon(primaryItem.name, primaryItem.category)}
                       </div>
                       <div className="absolute -bottom-1.5 -right-1.5 bg-[var(--accent)] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full z-20 shadow-sm">
-                        {group.length}
+                        {formatNumber(group.length, language)}
                       </div>
                     </div>
 
                     <div>
                       <h3 className="text-lg font-bold text-[var(--text-primary)] leading-tight">{getPrimaryName(primaryItem)}</h3>
                       <p className="text-xs text-[var(--text-secondary)] font-medium mt-1">
-                        Total Stock: <span className="text-[var(--text-primary)]">{totalQty} {primaryItem.unit}</span>
+                        Total Stock: <span className="text-[var(--text-primary)]">{formatNumber(totalQty, language)} {formatUnit(primaryItem.unit, language)}</span>
                       </p>
                     </div>
                   </div>
@@ -334,7 +335,7 @@ export const InventoryList: React.FC<InventoryListProps> = ({
                               <h4 className="text-sm font-bold text-[var(--text-primary)] truncate">{getPrimaryName(item)}</h4>
                               <div className="flex items-center gap-2 mt-1">
                                 <span className={`text-[9px] font-bold uppercase ${status.text}`}>{status.label}</span>
-                                <span className="text-xs text-[var(--text-secondary)]">{item.quantity} {item.unit}</span>
+                                <span className="text-xs text-[var(--text-secondary)]">{formatNumber(item.quantity, language)} {formatUnit(item.unit, language)}</span>
                               </div>
                             </div>
                           </div>

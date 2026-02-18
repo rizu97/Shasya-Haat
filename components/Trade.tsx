@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Product, StockBatch } from '../types';
 import { TRANSLATIONS } from '../constants';
 import { Search, ScanQrCode, Plus, Minus, Trash2, ShoppingBag, ChevronRight, CheckCircle } from 'lucide-react';
+import { formatNumber, formatUnit } from '@/src/utils';
 
 interface CartItem {
   product: Product;
@@ -205,7 +206,7 @@ export const Trade: React.FC<TradeProps> = ({
         {/* Current Cart Header */}
         <div className="flex items-center justify-between px-1 pt-1">
           <h3 className="text-base font-bold text-[var(--text-primary)]">
-            {t('currentCart')} <span className="text-[var(--text-secondary)] text-xs font-normal">({cart.length})</span>
+            {t('currentCart')} <span className="text-[var(--text-secondary)] text-xs font-normal">({formatNumber(cart.length, language)})</span>
           </h3>
           {cart.length > 0 && (
             <button
@@ -265,7 +266,7 @@ export const Trade: React.FC<TradeProps> = ({
                   >
                     {item.quantity === 1 ? <Trash2 size={12} className="text-[var(--danger)]" /> : <Minus size={14} />}
                   </button>
-                  <span className="font-bold text-sm min-w-[16px] text-center text-[var(--text-primary)]">{item.quantity}</span>
+                  <span className="font-bold text-sm min-w-[16px] text-center text-[var(--text-primary)]">{formatNumber(item.quantity, language)}</span>
                   <button
                     onClick={() => updateQuantity(item.product.id, 1)}
                     className="w-7 h-7 rounded-lg bg-[var(--accent)] flex items-center justify-center text-white active:scale-90 transition-all shadow-sm"
@@ -325,7 +326,7 @@ export const Trade: React.FC<TradeProps> = ({
             <div className="bg-[var(--input-bg)] rounded-xl p-3 mb-5 border border-[var(--border-subtle)]">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-xs text-[var(--text-secondary)]">Items</span>
-                <span className="text-xs font-bold text-[var(--text-primary)]">{cart.reduce((a, b) => a + b.quantity, 0)}</span>
+                <span className="text-xs font-bold text-[var(--text-primary)]">{formatNumber(cart.reduce((a, b) => a + b.quantity, 0), language)}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-xs text-[var(--text-secondary)]">Total Amount</span>
@@ -396,7 +397,7 @@ const BatchDetailsModal: React.FC<{
         <div className="flex items-start justify-between mb-4">
           <div>
             <h3 className="text-lg font-bold text-[var(--text-primary)] leading-tight">{language === 'en' ? product.name : (product.nameBn || product.name)}</h3>
-            <p className="text-xs text-[var(--text-secondary)]">Stock: <span className="font-bold">{product.quantity} {product.unit}</span></p>
+            <p className="text-xs text-[var(--text-secondary)]">Stock: <span className="font-bold">{formatNumber(product.quantity, language)} {formatUnit(product.unit, language)}</span></p>
           </div>
           <button onClick={onCancel} className="p-2 -mr-2 -mt-2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)]">
             <span className="sr-only">Close</span>
@@ -423,10 +424,10 @@ const BatchDetailsModal: React.FC<{
                       />
                       <div>
                         <div className="text-xs font-bold text-[var(--text-primary)]">
-                          Exp: {batch.expiryDate ? new Date(batch.expiryDate).toLocaleDateString() : 'N/A'}
+                          Exp: {batch.expiryDate ? new Date(batch.expiryDate).toLocaleDateString(language === 'en' ? 'en-IN' : 'bn-IN') : 'N/A'}
                         </div>
                         <div className="text-[10px] text-[var(--text-secondary)]">
-                          Qty: {batch.quantity} | Cost: {formatCurrency(batch.costPrice || 0)}
+                          Qty: {formatNumber(batch.quantity, language)} | Cost: {formatCurrency(batch.costPrice || 0)}
                         </div>
                       </div>
                     </div>

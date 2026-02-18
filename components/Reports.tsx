@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { SaleRecord, Product } from '../types';
 import { TRANSLATIONS } from '../constants';
+import { formatNumber, formatUnit } from '@/src/utils'; // Import helpers
 import { ArrowUp, ArrowDown, Plus, ShoppingBag, ChevronDown, Calendar, X, TrendingUp } from 'lucide-react';
 
 interface ReportsProps {
@@ -55,7 +56,11 @@ export const Reports: React.FC<ReportsProps> = ({ sales, products, language }) =
 
    // Date Logic
    const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
-   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+   // Localized Months
+   const monthsEn = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+   const monthsBn = ["জানু", "ফেব", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্ট", "অক্টো", "নভ", "ডিসেম"];
+   const months = language === 'en' ? monthsEn : monthsBn;
+
    const daysInMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0).getDate();
    const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
@@ -78,7 +83,9 @@ export const Reports: React.FC<ReportsProps> = ({ sales, products, language }) =
       return dates;
    }, [selectedDate]);
 
-   const weekDayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+   const weekDayNamesEn = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+   const weekDayNamesBn = ['রবি', 'সোম', 'মঙ্গল', 'বুধ', 'বৃহঃ', 'শুক্র', 'শনি'];
+   const weekDayNames = language === 'en' ? weekDayNamesEn : weekDayNamesBn;
 
    // Data Logic with Filters
    const { transactions, stats } = useMemo(() => {
@@ -205,7 +212,7 @@ export const Reports: React.FC<ReportsProps> = ({ sales, products, language }) =
                         onChange={(e) => handleDateChange('date', parseInt(e.target.value))}
                         className="w-full appearance-none bg-[var(--input-bg)] text-[var(--text-primary)] py-2.5 px-3 rounded-xl font-bold outline-none border border-[var(--border-color)] text-sm focus:border-[var(--accent)]"
                      >
-                        {days.map(d => <option key={d} value={d}>{d}</option>)}
+                        {days.map(d => <option key={d} value={d}>{formatNumber(d, language)}</option>)}
                      </select>
                      <ChevronDown size={14} className="absolute right-2.5 top-3 text-[var(--text-tertiary)] pointer-events-none" />
                   </div>
@@ -226,7 +233,7 @@ export const Reports: React.FC<ReportsProps> = ({ sales, products, language }) =
                      onChange={(e) => handleDateChange('year', parseInt(e.target.value))}
                      className="w-full appearance-none bg-[var(--input-bg)] text-[var(--text-primary)] py-2.5 px-3 rounded-xl font-bold outline-none border border-[var(--border-color)] text-sm focus:border-[var(--accent)]"
                   >
-                     {years.map(y => <option key={y} value={y}>{y}</option>)}
+                     {years.map(y => <option key={y} value={y}>{formatNumber(y, language)}</option>)}
                   </select>
                   <ChevronDown size={14} className="absolute right-2.5 top-3 text-[var(--text-tertiary)] pointer-events-none" />
                </div>
@@ -245,7 +252,7 @@ export const Reports: React.FC<ReportsProps> = ({ sales, products, language }) =
                         >
                            <span className="text-[10px] font-bold uppercase text-[var(--text-secondary)]">{weekDayNames[d.getDay()]}</span>
                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm transition-all ${isSelected ? 'bg-[var(--accent)] text-white shadow-[var(--shadow-glow)] scale-110' : 'text-[var(--text-primary)] bg-[var(--input-bg)]'}`}>
-                              {d.getDate()}
+                              {formatNumber(d.getDate(), language)}
                            </div>
                         </div>
                      );
@@ -297,7 +304,7 @@ export const Reports: React.FC<ReportsProps> = ({ sales, products, language }) =
                   <span className="text-[var(--text-tertiary)] text-sm font-bn font-medium">/ ইতিহাস</span>
                </h3>
                <span className="text-xs font-bold text-[var(--text-tertiary)] bg-[var(--input-bg)] px-3 py-1 rounded-full border border-[var(--border-subtle)]">
-                  {transactions.length} items
+                  {formatNumber(transactions.length, language)} items
                </span>
             </div>
 
@@ -336,7 +343,7 @@ export const Reports: React.FC<ReportsProps> = ({ sales, products, language }) =
                            </div>
                            <div className="text-right">
                               <span className={`block font-bold text-sm ${t.type === 'SALE' ? 'text-[var(--accent)]' : 'text-[var(--success)]'}`}>
-                                 {t.type === 'SALE' ? '-' : '+'} {t.quantity} {t.unit === 'pcs' ? 'Pcs' : t.unit}
+                                 {t.type === 'SALE' ? '-' : '+'} {formatNumber(t.quantity, language)} {formatUnit(t.unit, language)}
                               </span>
                               <span className="text-xs font-bold text-[var(--text-secondary)] font-mono">{formatCurrency(t.amount)}</span>
                            </div>
@@ -383,7 +390,7 @@ export const Reports: React.FC<ReportsProps> = ({ sales, products, language }) =
                      <div className="flex justify-between items-center py-2 border-b border-[var(--border-color)]">
                         <span className="text-sm text-[var(--text-tertiary)]">{t('quantity')}</span>
                         <span className="font-bold text-sm text-[var(--text-primary)]">
-                           {selectedTransaction.quantity} {selectedTransaction.unit}
+                           {formatNumber(selectedTransaction.quantity, language)} {formatUnit(selectedTransaction.unit, language)}
                         </span>
                      </div>
                      {selectedTransaction.quantity > 0 && (
